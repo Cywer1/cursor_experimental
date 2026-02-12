@@ -1,0 +1,31 @@
+# Godot 4+ editor and cache
+.godot/
+
+# Godot import cache (Godot 3; kept for compatibility)
+.import/
+
+# Export presets (local export paths; share via docs if needed)
+export_presets.cfg
+
+# Generated translation files
+*.translation
+
+# Mono / C# (if you add C# support later)
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editors
+.idea/
+*.swp
+*.swo
+*~
+
+# Build / logs
+*.log
+*.tmp
