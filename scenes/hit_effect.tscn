@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://hit_effect_particle"]
+
+[ext_resource type="Script" path="res://scripts/hit_effect.gd" id="1_script"]
+
+[node name="HitEffect" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+amount = 16
+explosiveness = 1.0
+randomness = 0.4
+lifetime = 0.35
+one_shot = true
+emitting = false
+direction = Vector2(1, 0)
+spread = 360.0
+initial_velocity_min = 120.0
+initial_velocity_max = 220.0
+scale_amount_min = 0.8
+scale_amount_max = 1.5
+color = Color(1, 0.15, 0.15, 1)

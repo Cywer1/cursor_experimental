@@ -1,0 +1,113 @@
+[gd_scene load_steps=2 format=3 uid="uid://d15toynwi7hhi"]
+
+[ext_resource type="PackedScene" uid="uid://c8xghb5svlxie" path="res://scenes/wall.tscn" id="1_yax5h"]
+
+[node name="Walls" type="Node2D"]
+
+[node name="Wall" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 128)
+
+[node name="Wall2" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 382)
+
+[node name="Wall3" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 638)
+
+[node name="Wall4" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 893)
+
+[node name="Wall5" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 1143)
+
+[node name="Wall6" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 1398)
+
+[node name="Wall19" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 128)
+
+[node name="Wall20" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 382)
+
+[node name="Wall21" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 638)
+
+[node name="Wall22" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 893)
+
+[node name="Wall23" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 1143)
+
+[node name="Wall24" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 1398)
+
+[node name="Wall7" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, 1651)
+
+[node name="Wall8" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(125, 1651)
+
+[node name="Wall9" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(382, 1651)
+
+[node name="Wall10" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(634, 1651)
+
+[node name="Wall11" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(888, 1651)
+
+[node name="Wall12" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1145, 1651)
+
+[node name="Wall13" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1402, 1651)
+
+[node name="Wall14" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1654, 1651)
+
+[node name="Wall15" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1908, 1651)
+
+[node name="Wall16" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2164, 1651)
+
+[node name="Wall17" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2416, 1651)
+
+[node name="Wall18" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, 1651)
+
+[node name="Wall25" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(-127, -127)
+
+[node name="Wall26" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(125, -127)
+
+[node name="Wall27" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(382, -127)
+
+[node name="Wall28" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(634, -127)
+
+[node name="Wall29" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(888, -127)
+
+[node name="Wall30" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1145, -127)
+
+[node name="Wall31" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1402, -127)
+
+[node name="Wall32" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1654, -127)
+
+[node name="Wall33" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(1908, -127)
+
+[node name="Wall34" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2164, -127)
+
+[node name="Wall35" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2416, -127)
+
+[node name="Wall36" parent="." instance=ExtResource("1_yax5h")]
+position = Vector2(2670, -127)
