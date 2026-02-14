@@ -2,21 +2,28 @@ extends CharacterBody2D
 
 signal died
 signal health_changed(current: float, max_val: float)
+signal currency_changed(amount: int)
 
-const SPEED = 600.0
-const HEALTH_MAX := 100.0
+const BASE_SPEED := 600.0
+const BASE_HEALTH_MAX := 100.0
 const DASH_SPEED := 1200.0
 const DASH_DURATION := 0.45
 const DASH_COOLDOWN := 0.8
-const STAMINA_MAX := 100.0
+const BASE_STAMINA_MAX := 100.0
 const STAMINA_DASH_COST := 25.0
 const STAMINA_REGEN_PER_SEC := 30.0
 const INVINCIBILITY_DURATION := 1.0
 const HIT_ALPHA_PULSE_DURATION := 0.5
-const DASH_DAMAGE := 20.0
+const BASE_DASH_DAMAGE := 20.0
+const DASH_KNOCKBACK_STRENGTH := 800.0
 
-var health: float = HEALTH_MAX
-var stamina: float = STAMINA_MAX
+var health_max: float = BASE_HEALTH_MAX
+var health: float = BASE_HEALTH_MAX
+var stamina_max: float = BASE_STAMINA_MAX
+var stamina: float = BASE_STAMINA_MAX
+var speed: float = BASE_SPEED
+var dash_damage: float = BASE_DASH_DAMAGE
+var currency: int = 0
 var invincibility_timer := 0.0
 var hit_effect_timer := 0.0
 var is_dashing := false
@@ -28,7 +35,7 @@ var _dash_hit_enemies: Array[Node] = []
 @onready var dash_damage_area: Area2D = $DashDamageArea
 
 func _ready() -> void:
-	health_changed.emit(health, HEALTH_MAX)
+	health_changed.emit(health, health_max)
 
 func _process(delta: float) -> void:
 	invincibility_timer = maxf(0.0, invincibility_timer - delta)
@@ -50,7 +57,7 @@ func _physics_process(delta: float) -> void:
 
 	# Regenerate stamina when not on cooldown
 	if dash_cooldown_timer <= 0.0:
-		stamina = minf(STAMINA_MAX, stamina + STAMINA_REGEN_PER_SEC * delta)
+		stamina = minf(stamina_max, stamina + STAMINA_REGEN_PER_SEC * delta)
 
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
@@ -64,14 +71,18 @@ func _physics_process(delta: float) -> void:
 			dash_timer = DASH_DURATION
 			return
 
-	velocity = direction * SPEED
+	velocity = direction * speed
 	move_and_slide()
+
+func add_currency(amount: int) -> void:
+	currency += amount
+	currency_changed.emit(currency)
 
 func take_damage(amount: float) -> bool:
 	if invincibility_timer > 0.0 or is_dashing:
 		return false
 	health -= amount
-	health_changed.emit(health, HEALTH_MAX)
+	health_changed.emit(health, health_max)
 	invincibility_timer = INVINCIBILITY_DURATION
 	hit_effect_timer = HIT_ALPHA_PULSE_DURATION
 	_spawn_hit_effect()
@@ -83,7 +94,10 @@ func take_damage(amount: float) -> bool:
 func _check_dash_damage() -> void:
 	for body in dash_damage_area.get_overlapping_bodies():
 		if body.is_in_group("enemies") and body not in _dash_hit_enemies:
-			body.take_damage(DASH_DAMAGE)
+			var knockback_dir := (body.global_position - global_position).normalized()
+			if knockback_dir == Vector2.ZERO:
+				knockback_dir = dash_direction
+			body.take_damage(dash_damage, knockback_dir, DASH_KNOCKBACK_STRENGTH)
 			_dash_hit_enemies.append(body)
 
 func _update_hit_effect() -> void:

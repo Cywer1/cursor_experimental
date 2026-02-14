@@ -1,6 +1,7 @@
 extends Node
 
 const ENEMY_SCENE := preload("res://scenes/enemy.tscn") as PackedScene
+const SHOP_SCENE := preload("res://scenes/shop.tscn") as PackedScene
 const SPAWN_BOUNDS_MIN := Vector2(100, 100)
 const SPAWN_BOUNDS_MAX := Vector2(2540, 1520)
 const WAVE_DELAY := 2.5
@@ -17,6 +18,9 @@ var in_wave_break := false
 @onready var game_over_ui: CanvasLayer = get_parent().get_node("GameOverLayer")
 @onready var hud: CanvasLayer = get_parent().get_node("HUDLayer")
 
+var upgrade_manager: Node
+var shop_ui: CanvasLayer
+
 func _ready() -> void:
 	# #region agent log
 	var _log := {"id":"gm_ready","timestamp":int(Time.get_ticks_msec()),"location":"game_manager.gd:_ready","message":"GameManager _ready before _start_next_wave","data":{},"hypothesisId":"H1"}
@@ -28,6 +32,13 @@ func _ready() -> void:
 		_f.close()
 	# #endregion
 	player.died.connect(_on_player_died)
+	upgrade_manager = Node.new()
+	upgrade_manager.set_script(preload("res://scripts/upgrade_manager.gd") as GDScript)
+	add_child(upgrade_manager)
+	shop_ui = SHOP_SCENE.instantiate() as CanvasLayer
+	get_parent().call_deferred("add_child", shop_ui)
+	shop_ui.setup(upgrade_manager, player, hud)
+	shop_ui.shop_closed.connect(_on_shop_closed)
 	call_deferred("_start_next_wave")
 
 func _process(delta: float) -> void:
@@ -90,10 +101,13 @@ func _check_wave_clear() -> void:
 			hud.update_countdown(remaining)
 		hud.set_countdown(0.0)
 		if not game_over:
-			_start_next_wave()
+			shop_ui.open_shop(get_tree())
 	else:
 		await get_tree().create_timer(0.5).timeout
 		_check_wave_clear()
+
+func _on_shop_closed() -> void:
+	_start_next_wave()
 
 func _on_player_died() -> void:
 	game_over = true

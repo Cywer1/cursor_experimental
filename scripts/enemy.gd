@@ -7,6 +7,9 @@ const MAX_HEALTH := 30.0
 const KNOCKBACK_FORCE := 350.0
 const KNOCKBACK_DECAY := 0.92
 const KNOCKBACK_MIN_DISTANCE := 80.0
+const PINBALL_DAMAGE := 15.0
+const PINBALL_SPEED_THRESHOLD := 200.0
+const PINBALL_BOUNCE_DAMPING := 0.5
 
 var health := MAX_HEALTH
 var hit_cooldown_timer := 0.0
@@ -20,10 +23,13 @@ func _physics_process(delta: float) -> void:
 	if knockback_velocity.length() > 5.0:
 		velocity = knockback_velocity
 		knockback_velocity *= KNOCKBACK_DECAY
+		rotation += velocity.length() * 0.008 * delta
 	else:
 		knockback_velocity = Vector2.ZERO
+		rotation = lerp_angle(rotation, 0.0, delta * 5.0)
 		_chase_player(delta)
 	move_and_slide()
+	_check_pinball_collision()
 
 func _chase_player(_delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player") as CharacterBody2D
@@ -32,10 +38,29 @@ func _chase_player(_delta: float) -> void:
 	var direction := (player.global_position - global_position).normalized()
 	velocity = direction * SPEED
 
-func take_damage(amount: float) -> void:
+const COLLECTABLE_SCENE := preload("res://scenes/collectable.tscn") as PackedScene
+
+func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockback_strength: float = 0.0) -> void:
 	health -= amount
+	if knockback_force != Vector2.ZERO and knockback_strength > 0.0:
+		knockback_velocity = knockback_force.normalized() * knockback_strength
 	if health <= 0.0:
+		var collectable := COLLECTABLE_SCENE.instantiate() as Node2D
+		collectable.global_position = global_position
+		get_parent().add_child(collectable)
 		queue_free()
+
+func _check_pinball_collision() -> void:
+	if velocity.length() < PINBALL_SPEED_THRESHOLD:
+		return
+	var count := get_slide_collision_count()
+	for i in count:
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider is CharacterBody2D and collider.is_in_group("enemies") and collider != self:
+			collider.take_damage(PINBALL_DAMAGE)
+			knockback_velocity = velocity.bounce(collision.get_normal()) * PINBALL_BOUNCE_DAMPING
+			break
 
 func _check_hitbox_overlap() -> void:
 	for body in hitbox.get_overlapping_bodies():

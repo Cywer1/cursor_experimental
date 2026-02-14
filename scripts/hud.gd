@@ -3,6 +3,7 @@ extends CanvasLayer
 @onready var wave_label: Label = $VBoxContainer/WaveLabel
 @onready var enemies_label: Label = $VBoxContainer/EnemiesLabel
 @onready var countdown_label: Label = $VBoxContainer/CountdownLabel
+@onready var scrap_label: Label = $VBoxContainer/ScrapLabel
 @onready var player_health_bar: ProgressBar = $VBoxContainer/PlayerHealthBar
 @onready var player_stamina_bar: ProgressBar = $VBoxContainer/PlayerStaminaBar
 
@@ -12,11 +13,13 @@ func _ready() -> void:
 	set_countdown(0.0)
 	_player = get_parent().get_node("Player")
 	_player.health_changed.connect(set_player_health)
-	call_deferred("set_player_health", _player.health, _player.HEALTH_MAX)
+	_player.currency_changed.connect(set_currency)
+	call_deferred("set_player_health", _player.health, _player.health_max)
+	set_currency(_player.currency)
 
 func _process(_delta: float) -> void:
 	if _player != null and is_instance_valid(_player):
-		player_stamina_bar.max_value = _player.STAMINA_MAX
+		player_stamina_bar.max_value = _player.stamina_max
 		player_stamina_bar.value = _player.stamina
 	# #region agent log
 	var _log := {"id":"hud_ready","timestamp":int(Time.get_ticks_msec()),"location":"hud.gd:_ready","message":"HUD _ready","data":{"wave_label_is_null":wave_label == null,"enemies_label_is_null":enemies_label == null},"hypothesisId":"H1"}
@@ -42,6 +45,9 @@ func set_wave(n: int) -> void:
 
 func set_enemies_remaining(n: int) -> void:
 	enemies_label.text = "Enemies: %d" % n
+
+func set_currency(amount: int) -> void:
+	scrap_label.text = "Scrap: %d" % amount
 
 func set_player_health(current: float, max_val: float) -> void:
 	player_health_bar.max_value = max_val

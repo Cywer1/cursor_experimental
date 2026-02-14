@@ -29,3 +29,7 @@ physics_2d/layer_2="enemies"
 physics_2d/layer_3="walls"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[physics]
+
+2d/default_gravity=0.0
