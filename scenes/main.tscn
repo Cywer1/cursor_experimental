@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bqx8ym3n2k5wp"]
+[gd_scene load_steps=8 format=3 uid="uid://bqx8ym3n2k5wp"]
 
 [ext_resource type="PackedScene" uid="uid://dj3qsblq07v4x" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://d15toynwi7hhi" path="res://scenes/walls.tscn" id="2_0wfyh"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://c57syk66xra2m" path="res://assets/sprites/floor_tileable_256x256.png" id="4_texture"]
 [ext_resource type="Script" uid="uid://dn5ajkmtj54fy" path="res://scripts/game_over_ui.gd" id="5_gameover"]
 [ext_resource type="Script" uid="uid://dxqfvkl0pwgxd" path="res://scripts/game_manager.gd" id="6_gamemanager"]
+[ext_resource type="PackedScene" uid="uid://v3r7054acm3c" path="res://scenes/enemy_tank.tscn" id="7_o6xl0"]
 
 [node name="Main" type="Node2D"]
 
@@ -79,3 +80,6 @@ size_flags_horizontal = 4
 text = "Quit"
 
 [node name="Hazards" type="Node2D" parent="."]
+
+[node name="EnemyTank" parent="." instance=ExtResource("7_o6xl0")]
+position = Vector2(385, 1085)

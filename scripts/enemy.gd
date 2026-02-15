@@ -14,6 +14,7 @@ const HAZARD_AVOID_DISTANCE := 100.0
 const KNOCKBACK_STOP_SPEED := 50.0
 
 var health := MAX_HEALTH
+var max_health: float = MAX_HEALTH
 var hit_cooldown_timer := 0.0
 var knockback_velocity := Vector2.ZERO
 var is_knocked_back := false

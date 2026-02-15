@@ -7,7 +7,7 @@ var _last_health := -1.0
 
 func _process(_delta: float) -> void:
 	var enemy := get_parent()
-	if not "health" in enemy or not "MAX_HEALTH" in enemy:
+	if not "health" in enemy:
 		return
 	var current: float = enemy.health
 	if current != _last_health:
@@ -16,10 +16,10 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	var enemy := get_parent()
-	if not "health" in enemy or not "MAX_HEALTH" in enemy:
+	if not "health" in enemy:
 		return
 	var h: float = enemy.health
-	var max_h: float = enemy.MAX_HEALTH
+	var max_h: float = enemy.get("max_health") if enemy.get("max_health") != null else enemy.MAX_HEALTH
 	var ratio := clampf(h / max_h, 0.0, 1.0) if max_h > 0.0 else 0.0
 
 	var bg_rect := Rect2(-BAR_WIDTH / 2.0, -BAR_HEIGHT / 2.0, BAR_WIDTH, BAR_HEIGHT)

@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://f4ufr6rda2i4"]
+
+[ext_resource type="Script" uid="uid://dbiawcq0706cm" path="res://scripts/enemy_shooter.gd" id="1_shooter"]
+[ext_resource type="Script" uid="uid://bhthewnl54as2" path="res://scripts/enemy_health_bar.gd" id="2_healthbar"]
+[ext_resource type="Texture2D" uid="uid://cyt3l6vovoubw" path="res://assets/sprites/enemy_texture.png" id="3_texture"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(80, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(35, 55)
+
+[node name="EnemyShooter" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 2
+collision_mask = 6
+motion_mode = 1
+script = ExtResource("1_shooter")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 0
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(-3.5, -1.5)
+shape = SubResource("RectangleShape2D_hitbox")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.65, 0.2, 0.9, 1)
+texture = ExtResource("3_texture")
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(-3.5, -45)
+script = ExtResource("2_healthbar")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-3.5, -1.5)
+shape = SubResource("RectangleShape2D_body")

@@ -1,7 +1,14 @@
 extends Node
 
 const ENEMY_SCENE := preload("res://scenes/enemy.tscn") as PackedScene
+const ENEMY_CHARGER_SCENE := preload("res://scenes/enemy_charger.tscn") as PackedScene
+const ENEMY_SHOOTER_SCENE := preload("res://scenes/enemy_shooter.tscn") as PackedScene
+const ENEMY_TANK_SCENE := preload("res://scenes/enemy_tank.tscn") as PackedScene
 const HAZARD_SCENE := preload("res://scenes/hazard.tscn") as PackedScene
+const CHARGER_SPAWN_CHANCE := 0.2
+const SHOOTER_SPAWN_CHANCE := 0.15
+const TANK_SPAWN_CHANCE := 0.15
+const TANK_WAVE_MIN := 4
 const SHOP_SCENE := preload("res://scenes/shop.tscn") as PackedScene
 const SPAWN_BOUNDS_MIN := Vector2(100, 100)
 const SPAWN_BOUNDS_MAX := Vector2(2540, 1520)
@@ -94,7 +101,17 @@ const HAZARD_MIN_SPACING := 80.0
 const HAZARD_SPAWN_ATTEMPTS := 30
 
 func _spawn_enemy() -> void:
-	var enemy := ENEMY_SCENE.instantiate() as Node2D
+	var use_tank := current_wave >= TANK_WAVE_MIN and randf() < TANK_SPAWN_CHANCE
+	var use_shooter := current_wave >= 3 and randf() < SHOOTER_SPAWN_CHANCE
+	var use_charger := current_wave >= 2 and randf() < CHARGER_SPAWN_CHANCE
+	var scene: PackedScene = ENEMY_SCENE
+	if use_tank:
+		scene = ENEMY_TANK_SCENE
+	elif use_shooter:
+		scene = ENEMY_SHOOTER_SCENE
+	elif use_charger:
+		scene = ENEMY_CHARGER_SCENE
+	var enemy: Node2D = scene.instantiate() as Node2D
 	var pos: Vector2
 	for attempt in SPAWN_SAFE_ATTEMPTS:
 		pos = Vector2(
