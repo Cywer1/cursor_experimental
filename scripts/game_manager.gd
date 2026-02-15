@@ -1,6 +1,7 @@
 extends Node
 
 const ENEMY_SCENE := preload("res://scenes/enemy.tscn") as PackedScene
+const HAZARD_SCENE := preload("res://scenes/hazard.tscn") as PackedScene
 const SHOP_SCENE := preload("res://scenes/shop.tscn") as PackedScene
 const SPAWN_BOUNDS_MIN := Vector2(100, 100)
 const SPAWN_BOUNDS_MAX := Vector2(2540, 1520)
@@ -17,6 +18,8 @@ var in_wave_break := false
 @onready var enemies_container: Node2D = get_parent().get_node("Enemies")
 @onready var game_over_ui: CanvasLayer = get_parent().get_node("GameOverLayer")
 @onready var hud: CanvasLayer = get_parent().get_node("HUDLayer")
+
+@onready var hazards_container: Node2D = $"../Hazards"
 
 var upgrade_manager: Node
 var shop_ui: CanvasLayer
@@ -39,6 +42,12 @@ func _ready() -> void:
 	get_parent().call_deferred("add_child", shop_ui)
 	shop_ui.setup(upgrade_manager, player, hud)
 	shop_ui.shop_closed.connect(_on_shop_closed)
+	var hazards_node := get_parent().get_node_or_null("Hazards")
+	if hazards_node == null:
+		hazards_node = Node2D.new()
+		hazards_node.name = "Hazards"
+		get_parent().add_child(hazards_node)
+	hazards_container = hazards_node
 	call_deferred("_start_next_wave")
 
 func _process(delta: float) -> void:
@@ -55,6 +64,7 @@ func _start_next_wave() -> void:
 	if game_over:
 		return
 	current_wave += 1
+	_spawn_hazards_for_wave(current_wave)
 	var count := BASE_ENEMIES + current_wave
 	for i in count:
 		_spawn_enemy()
@@ -75,13 +85,64 @@ func _start_next_wave() -> void:
 	await get_tree().create_timer(0.5).timeout
 	_check_wave_clear()
 
+const SPAWN_SAFE_DISTANCE := 400.0
+const SPAWN_HAZARD_MIN_DISTANCE := 50.0
+const SPAWN_SAFE_ATTEMPTS := 10
+const HAZARD_BASE_COUNT := 2
+const HAZARD_PLAYER_MIN_DISTANCE := 300.0
+const HAZARD_MIN_SPACING := 80.0
+const HAZARD_SPAWN_ATTEMPTS := 30
+
 func _spawn_enemy() -> void:
 	var enemy := ENEMY_SCENE.instantiate() as Node2D
-	enemy.global_position = Vector2(
-		randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MAX.x),
-		randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MAX.y)
-	)
+	var pos: Vector2
+	for attempt in SPAWN_SAFE_ATTEMPTS:
+		pos = Vector2(
+			randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MAX.x),
+			randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MAX.y)
+		)
+		if pos.distance_to(player.global_position) < SPAWN_SAFE_DISTANCE:
+			continue
+		if _is_pos_near_hazard(pos):
+			continue
+		break
+	enemy.global_position = pos
 	enemies_container.add_child(enemy)
+
+func _is_pos_near_hazard(pos: Vector2) -> bool:
+	for hazard in get_tree().get_nodes_in_group("hazards"):
+		var node := hazard as Node2D
+		if node != null and pos.distance_to(node.global_position) < SPAWN_HAZARD_MIN_DISTANCE:
+			return true
+	return false
+
+func _spawn_hazards_for_wave(wave_index: int) -> void:
+	if hazards_container == null:
+		return
+	for child in hazards_container.get_children():
+		child.queue_free()
+	var hazard_count := HAZARD_BASE_COUNT + int(wave_index / 2)
+	for i in hazard_count:
+		var pos: Vector2
+		for attempt in HAZARD_SPAWN_ATTEMPTS:
+			pos = Vector2(
+				randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MAX.x),
+				randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MAX.y)
+			)
+			if pos.distance_to(player.global_position) < HAZARD_PLAYER_MIN_DISTANCE:
+				continue
+			var too_near := false
+			for existing in hazards_container.get_children():
+				var node := existing as Node2D
+				if node != null and pos.distance_to(node.global_position) < HAZARD_MIN_SPACING:
+					too_near = true
+					break
+			if not too_near:
+				break
+		var hazard := HAZARD_SCENE.instantiate() as Node2D
+		hazard.add_to_group("hazards")
+		hazards_container.add_child(hazard)
+		hazard.global_position = pos
 
 func _check_wave_clear() -> void:
 	if game_over:

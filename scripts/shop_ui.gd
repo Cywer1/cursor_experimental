@@ -31,6 +31,24 @@ func _update_scrap_label() -> void:
 	if scrap_label and _player:
 		scrap_label.text = "Scrap: %d" % _player.currency
 
+func _update_button_affordability() -> void:
+	if container == null or _player == null:
+		return
+	for child in container.get_children():
+		var btn := child as Button
+		if btn == null or btn.text == "SOLD":
+			continue
+		if not btn.has_meta("upgrade"):
+			continue
+		var upgrade: Dictionary = btn.get_meta("upgrade")
+		var cost: int = upgrade.cost
+		if _player.currency < cost:
+			btn.disabled = true
+			btn.modulate = Color(0.7, 0.4, 0.4)
+		else:
+			btn.disabled = false
+			btn.modulate = Color(1.0, 1.0, 1.0)
+
 var _upgrade_manager: Node
 var _player: CharacterBody2D
 var _hud: CanvasLayer
@@ -57,15 +75,20 @@ func open_shop(tree: SceneTree = null) -> void:
 		return
 	for child in container.get_children():
 		child.queue_free()
-	var upgrades: Array = _upgrade_manager.get_random_upgrades(3)
+	var upgrades: Array = _upgrade_manager.get_random_upgrades(3, _player.currency)
 	for upgrade: Dictionary in upgrades:
 		var btn := Button.new()
-		btn.text = "%s\nCost: %d scraps\n%s" % [upgrade.name, upgrade.cost, upgrade.description]
+		btn.set_meta("upgrade", upgrade)
+		btn.text = "%s\n%s\nCost: %d" % [upgrade.name, upgrade.description, upgrade.cost]
 		btn.custom_minimum_size = Vector2(180, 80)
-		btn.pressed.connect(_buy_upgrade.bind(upgrade))
+		var cost: int = upgrade.cost
+		if _player.currency < cost:
+			btn.disabled = true
+			btn.modulate = Color(0.7, 0.4, 0.4)
+		btn.pressed.connect(_buy_upgrade.bind(upgrade, btn))
 		container.add_child(btn)
 
-func _buy_upgrade(upgrade: Dictionary) -> void:
+func _buy_upgrade(upgrade: Dictionary, button: Button) -> void:
 	var cost: int = upgrade.cost
 	if _player.currency < cost:
 		return
@@ -73,7 +96,9 @@ func _buy_upgrade(upgrade: Dictionary) -> void:
 	_player.currency_changed.emit(_player.currency)
 	_update_scrap_label()
 	_apply_effect(upgrade)
-	_close_shop()
+	button.disabled = true
+	button.text = "SOLD"
+	_update_button_affordability()
 
 func _apply_effect(upgrade: Dictionary) -> void:
 	var effect_type: String = upgrade.effect_type
@@ -89,6 +114,10 @@ func _apply_effect(upgrade: Dictionary) -> void:
 		"Stamina":
 			_player.stamina_max += value
 			_player.stamina = minf(_player.stamina, _player.stamina_max)
+		"Knockback":
+			_player.dash_knockback_strength += value
+		"Regen":
+			_player.stamina_regen_per_sec += value
 
 func _on_close_pressed() -> void:
 	_close_shop()

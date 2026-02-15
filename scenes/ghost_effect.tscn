@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://mwxnpu4e822h"]
+
+[ext_resource type="Texture2D" uid="uid://vwdqa486sveg" path="res://assets/sprites/player_texture.png" id="1_ehm31"]
+[ext_resource type="Script" uid="uid://cxhtnuqp11ic5" path="res://scripts/ghost_effect.gd" id="1_script"]
+
+[node name="GhostEffect" type="Sprite2D"]
+z_index = -10
+texture = ExtResource("1_ehm31")
+script = ExtResource("1_script")
