@@ -70,8 +70,15 @@ func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockba
 	if health <= 0.0:
 		if death_sfx:
 			SoundManager.play_sfx(death_sfx)
+		var spawn_pos := global_position
+		for hazard in get_tree().get_nodes_in_group("hazards"):
+			var node := hazard as Node2D
+			if node != null and spawn_pos.distance_to(node.global_position) < 80.0:
+				var away := (spawn_pos - node.global_position).normalized()
+				if away.length() > 0.01:
+					spawn_pos += away * 100.0
 		var collectable := COLLECTABLE_SCENE.instantiate() as Node2D
-		collectable.global_position = global_position
+		collectable.global_position = spawn_pos
 		get_tree().current_scene.call_deferred("add_child", collectable)
 		call_deferred("queue_free")
 

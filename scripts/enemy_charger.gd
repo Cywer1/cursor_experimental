@@ -27,6 +27,7 @@ const GHOST_OFFSET_1 := 20.0
 const GHOST_OFFSET_2 := 40.0
 const GHOST_OFFSET_3 := 60.0
 const AIM_WOBBLE_AMOUNT := 0.15
+const HAZARD_REPULSION_STRENGTH := 300.0
 
 var state := State.CHASE
 var charge_delay_timer := 0.0
@@ -118,6 +119,14 @@ func _chase_state(delta: float, player: CharacterBody2D) -> void:
 	else:
 		var chase_speed := randf_range(CHASE_SPEED_MIN, CHASE_SPEED_MAX)
 		velocity = dir * chase_speed
+	# Hazard avoidance: steer away from hazards within range
+	for hazard in get_tree().get_nodes_in_group("hazards"):
+		var node := hazard as Node2D
+		if node != null:
+			var d := global_position.distance_to(node.global_position)
+			if d < HAZARD_AVOID_DISTANCE and d > 0.01:
+				var repulsion := (global_position - node.global_position).normalized() * HAZARD_REPULSION_STRENGTH
+				velocity += repulsion
 
 func _prepare_state(delta: float) -> void:
 	velocity = Vector2.ZERO

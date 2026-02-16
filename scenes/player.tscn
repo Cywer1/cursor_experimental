@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dj3qsblq07v4x"]
+[gd_scene load_steps=7 format=3 uid="uid://dj3qsblq07v4x"]
 
 [ext_resource type="Script" uid="uid://bldbl6fqu5bii" path="res://scripts/player.gd" id="1_3vyb7"]
+[ext_resource type="AudioStream" uid="uid://1sowv51g6lox" path="res://assets/sounds/player_dash.wav" id="2_dqkch"]
 [ext_resource type="Texture2D" uid="uid://vwdqa486sveg" path="res://assets/sprites/player_texture.png" id="2_g2els"]
 [ext_resource type="Script" uid="uid://brbkc0h338xdl" path="res://scripts/camera_shake.gd" id="3_camera_shake"]
 
@@ -13,6 +14,7 @@ size = Vector2(40, 60)
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_mask = 4
 script = ExtResource("1_3vyb7")
+dash_sfx = ExtResource("2_dqkch")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_g2els")

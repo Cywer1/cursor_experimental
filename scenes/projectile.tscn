@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bjsnikoa1jyvm"]
+[gd_scene load_steps=5 format=3 uid="uid://bjsnikoa1jyvm"]
 
 [ext_resource type="Script" uid="uid://drlm8rua614c4" path="res://scripts/projectile.gd" id="1_script"]
+[ext_resource type="AudioStream" uid="uid://bsgtl5bd8py0g" path="res://assets/sounds/deflect.wav" id="2_q3m7n"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_c8fcr"]
 
@@ -12,6 +13,7 @@ collision_layer = 2
 collision_mask = 5
 monitorable = false
 script = ExtResource("1_script")
+deflect_sfx = ExtResource("2_q3m7n")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.6, 0.2, 0.9, 1)

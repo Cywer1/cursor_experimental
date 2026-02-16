@@ -59,6 +59,23 @@ func _ready() -> void:
 	if close_button:
 		close_button.pressed.connect(_on_close_pressed)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_1:
+			_try_buy_at_index(0)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_2:
+			_try_buy_at_index(1)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_3:
+			_try_buy_at_index(2)
+			get_viewport().set_input_as_handled()
+	if event.is_action_pressed("ui_accept"):
+		_on_close_pressed()
+		get_viewport().set_input_as_handled()
+
 func setup(upgrade_manager: Node, player: CharacterBody2D, hud: CanvasLayer) -> void:
 	_upgrade_manager = upgrade_manager
 	_player = player
@@ -87,6 +104,18 @@ func open_shop(tree: SceneTree = null) -> void:
 			btn.modulate = Color(0.7, 0.4, 0.4)
 		btn.pressed.connect(_buy_upgrade.bind(upgrade, btn))
 		container.add_child(btn)
+
+func _try_buy_at_index(index: int) -> void:
+	if container == null:
+		return
+	var children := container.get_children()
+	if index < 0 or index >= children.size():
+		return
+	var btn := children[index] as Button
+	if btn == null or btn.disabled or not btn.has_meta("upgrade"):
+		return
+	var upgrade: Dictionary = btn.get_meta("upgrade")
+	_buy_upgrade(upgrade, btn)
 
 func _buy_upgrade(upgrade: Dictionary, button: Button) -> void:
 	var cost: int = upgrade.cost

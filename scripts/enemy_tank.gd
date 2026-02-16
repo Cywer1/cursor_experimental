@@ -1,6 +1,6 @@
 extends "res://scripts/enemy.gd"
 
-const TANK_MAX_HEALTH := 150.0
+const TANK_MAX_HEALTH := 80.0
 const TANK_SPEED := 60.0
 const KNOCKBACK_RESISTANCE := 0.1
 const CONTACT_KNOCKBACK := 1000.0
