@@ -39,6 +39,8 @@ var dash_cooldown_timer := 0.0
 var knockback_velocity := Vector2.ZERO
 var _dash_hit_enemies: Array[Node] = []
 
+@export var dash_sfx: AudioStream
+
 @onready var dash_damage_area: Area2D = $DashDamageArea
 @onready var ghosts_container: Node2D = $Ghosts
 @onready var ghost1: Sprite2D = $Ghosts/Ghost1
@@ -87,6 +89,8 @@ func _physics_process(delta: float) -> void:
 			_dash_hit_enemies.clear()
 			is_dashing = true
 			dash_timer = DASH_DURATION
+			if dash_sfx:
+				SoundManager.play_sfx(dash_sfx, randf_range(0.9, 1.1))
 			return
 	velocity = direction * speed
 	move_and_slide()

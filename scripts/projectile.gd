@@ -5,6 +5,8 @@ var direction: Vector2 = Vector2.RIGHT
 var damage: float = 10.0
 var is_hostile: bool = true
 
+@export var deflect_sfx: AudioStream
+
 const HOMING_RANGE := 800.0
 
 func _get_homing_target() -> Vector2:
@@ -37,6 +39,8 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		if body.get("is_dashing") == true:
 			# Deflect: homing toward nearest enemy or reverse path
+			if deflect_sfx:
+				SoundManager.play_sfx(deflect_sfx)
 			is_hostile = false
 			direction = _get_homing_target()
 			if direction.length() < 0.01:

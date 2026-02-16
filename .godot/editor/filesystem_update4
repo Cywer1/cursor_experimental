@@ -12,3 +12,4 @@ res://scripts/projectile.gd
 res://scenes/main.tscn
 res://scenes/enemy_boss.tscn
 res://scenes/boss_ui.tscn
+res://scripts/player.gd

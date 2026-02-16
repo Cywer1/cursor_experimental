@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.4")
 [autoload]
 
 FloatingTextManager="*res://scripts/floating_text_manager.gd"
+SoundManager="*res://scripts/sound_manager.gd"
 
 [global_group]
 

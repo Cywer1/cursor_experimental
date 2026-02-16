@@ -19,6 +19,9 @@ var hit_cooldown_timer := 0.0
 var knockback_velocity := Vector2.ZERO
 var is_knocked_back := false
 
+@export var hit_sfx: AudioStream
+@export var death_sfx: AudioStream
+
 @onready var hitbox: Area2D = $Hitbox
 
 func _physics_process(delta: float) -> void:
@@ -57,12 +60,16 @@ const COLLECTABLE_SCENE := preload("res://scenes/collectable.tscn") as PackedSce
 
 func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockback_strength: float = 0.0) -> void:
 	FloatingTextManager.show_damage(global_position, amount)
+	if hit_sfx:
+		SoundManager.play_sfx(hit_sfx)
 	health -= amount
 	if knockback_force != Vector2.ZERO and knockback_strength > 0.0:
 		velocity = knockback_force.normalized() * knockback_strength
 		knockback_velocity = velocity
 		is_knocked_back = true
 	if health <= 0.0:
+		if death_sfx:
+			SoundManager.play_sfx(death_sfx)
 		var collectable := COLLECTABLE_SCENE.instantiate() as Node2D
 		collectable.global_position = global_position
 		get_tree().current_scene.call_deferred("add_child", collectable)
