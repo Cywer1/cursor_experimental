@@ -65,7 +65,7 @@ func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockba
 	if health <= 0.0:
 		var collectable := COLLECTABLE_SCENE.instantiate() as Node2D
 		collectable.global_position = global_position
-		get_parent().call_deferred("add_child", collectable)
+		get_tree().current_scene.call_deferred("add_child", collectable)
 		call_deferred("queue_free")
 
 func _check_pinball_collision() -> void:

@@ -4,7 +4,10 @@ const ENEMY_SCENE := preload("res://scenes/enemy.tscn") as PackedScene
 const ENEMY_CHARGER_SCENE := preload("res://scenes/enemy_charger.tscn") as PackedScene
 const ENEMY_SHOOTER_SCENE := preload("res://scenes/enemy_shooter.tscn") as PackedScene
 const ENEMY_TANK_SCENE := preload("res://scenes/enemy_tank.tscn") as PackedScene
+const ENEMY_BOSS_SCENE := preload("res://scenes/enemy_boss.tscn") as PackedScene
 const HAZARD_SCENE := preload("res://scenes/hazard.tscn") as PackedScene
+const BOSS_UI_SCENE := preload("res://scenes/boss_ui.tscn") as PackedScene
+const BOSS_SCRAP_REWARD := 50
 const CHARGER_SPAWN_CHANCE := 0.2
 const SHOOTER_SPAWN_CHANCE := 0.15
 const TANK_SPAWN_CHANCE := 0.15
@@ -20,6 +23,7 @@ var current_wave := 0
 var game_over := false
 var wave_timer := 0.0
 var in_wave_break := false
+var boss_active := false
 
 @onready var player: CharacterBody2D = get_parent().get_node("Player")
 @onready var enemies_container: Node2D = get_parent().get_node("Enemies")
@@ -30,6 +34,7 @@ var in_wave_break := false
 
 var upgrade_manager: Node
 var shop_ui: CanvasLayer
+var boss_ui: CanvasLayer
 
 func _ready() -> void:
 	# #region agent log
@@ -55,12 +60,16 @@ func _ready() -> void:
 		hazards_node.name = "Hazards"
 		get_parent().add_child(hazards_node)
 	hazards_container = hazards_node
+	boss_ui = BOSS_UI_SCENE.instantiate() as CanvasLayer
+	get_parent().call_deferred("add_child", boss_ui)
 	call_deferred("_start_next_wave")
 
 func _process(delta: float) -> void:
 	if game_over:
 		return
 	if in_wave_break:
+		return
+	if boss_active:
 		return
 	wave_timer -= delta
 	if wave_timer < 0.0:
@@ -72,9 +81,15 @@ func _start_next_wave() -> void:
 		return
 	current_wave += 1
 	_spawn_hazards_for_wave(current_wave)
-	var count := BASE_ENEMIES + current_wave
-	for i in count:
-		_spawn_enemy()
+	var is_boss_wave := current_wave % 10 == 0
+	if is_boss_wave:
+		boss_active = true
+		var tier: int = int(current_wave / 10)
+		_spawn_boss(tier)
+	else:
+		var count := BASE_ENEMIES + current_wave
+		for i in count:
+			_spawn_enemy()
 	# #region agent log
 	var _log := {"id":"gm_set_wave","timestamp":int(Time.get_ticks_msec()),"location":"game_manager.gd:_start_next_wave","message":"About to call hud.set_wave","data":{"current_wave":current_wave},"hypothesisId":"H1"}
 	var _f := FileAccess.open("res://.cursor/debug.log", FileAccess.READ_WRITE)
@@ -87,7 +102,7 @@ func _start_next_wave() -> void:
 	in_wave_break = false
 	wave_timer = WAVE_DURATION
 	hud.set_wave(current_wave)
-	hud.set_enemies_remaining(enemies_container.get_child_count())
+	hud.set_enemies_remaining(_get_enemy_count())
 	hud.set_countdown(wave_timer)
 	await get_tree().create_timer(0.5).timeout
 	_check_wave_clear()
@@ -99,6 +114,38 @@ const HAZARD_BASE_COUNT := 2
 const HAZARD_PLAYER_MIN_DISTANCE := 300.0
 const HAZARD_MIN_SPACING := 80.0
 const HAZARD_SPAWN_ATTEMPTS := 30
+
+func _get_enemy_count() -> int:
+	return get_tree().get_nodes_in_group("enemies").size()
+
+func _spawn_boss(tier: int) -> void:
+	var boss: Node2D = ENEMY_BOSS_SCENE.instantiate() as Node2D
+	boss.tier = tier
+	var pos: Vector2
+	for attempt in SPAWN_SAFE_ATTEMPTS:
+		pos = Vector2(
+			randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MAX.x),
+			randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MAX.y)
+		)
+		if pos.distance_to(player.global_position) < SPAWN_SAFE_DISTANCE:
+			continue
+		if _is_pos_near_hazard(pos):
+			continue
+		break
+	boss.global_position = pos
+	enemies_container.add_child(boss)
+	boss.boss_health_changed.connect(_on_boss_health_changed)
+	boss.boss_died.connect(_on_boss_died)
+	boss_ui.show_boss_ui(boss.max_health)
+
+func _on_boss_health_changed(current: float, max_hp: float) -> void:
+	boss_ui.update_health(current, max_hp)
+
+func _on_boss_died() -> void:
+	player.add_currency(BOSS_SCRAP_REWARD)
+	boss_ui.hide_boss_ui()
+	boss_active = false
+	_start_wave_break()
 
 func _spawn_enemy() -> void:
 	var use_tank := current_wave >= TANK_WAVE_MIN and randf() < TANK_SPAWN_CHANCE
@@ -161,25 +208,28 @@ func _spawn_hazards_for_wave(wave_index: int) -> void:
 		hazards_container.add_child(hazard)
 		hazard.global_position = pos
 
+func _start_wave_break() -> void:
+	in_wave_break = true
+	var remaining := WAVE_DELAY
+	hud.show_countdown(remaining)
+	while remaining > 0.0 and not game_over:
+		await get_tree().create_timer(0.1).timeout
+		remaining -= 0.1
+		if remaining < 0.0:
+			remaining = 0.0
+		hud.update_countdown(remaining)
+	hud.set_countdown(0.0)
+	if not game_over:
+		shop_ui.open_shop(get_tree())
+
 func _check_wave_clear() -> void:
 	if game_over:
 		return
 	await get_tree().create_timer(0.2).timeout
-	var enemy_count := enemies_container.get_child_count()
+	var enemy_count := _get_enemy_count()
 	hud.set_enemies_remaining(enemy_count)
 	if enemy_count <= 0 or wave_timer <= 0.0:
-		in_wave_break = true
-		var remaining := WAVE_DELAY
-		hud.show_countdown(remaining)
-		while remaining > 0.0 and not game_over:
-			await get_tree().create_timer(0.1).timeout
-			remaining -= 0.1
-			if remaining < 0.0:
-				remaining = 0.0
-			hud.update_countdown(remaining)
-		hud.set_countdown(0.0)
-		if not game_over:
-			shop_ui.open_shop(get_tree())
+		_start_wave_break()
 	else:
 		await get_tree().create_timer(0.5).timeout
 		_check_wave_clear()
