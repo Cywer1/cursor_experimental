@@ -16,7 +16,7 @@ script = ExtResource("1_script")
 deflect_sfx = ExtResource("2_q3m7n")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0.6, 0.2, 0.9, 1)
+modulate = Color(1, 1, 73.78, 1)
 scale = Vector2(0.0820313, 0.0117188)
 texture = SubResource("NoiseTexture2D_c8fcr")
 

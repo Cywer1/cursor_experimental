@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://b1mti41uftdij"]
+
+[ext_resource type="Script" uid="uid://s5lw42gk6pgy" path="res://scripts/crate.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dy4ippfrd8ewn" path="res://icon.svg" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_crate"]
+size = Vector2(32, 32)
+
+[node name="Crate" type="StaticBody2D" groups=["destructible"]]
+collision_layer = 6
+collision_mask = 0
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.2, 0.8, 0.2, 1)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_crate")

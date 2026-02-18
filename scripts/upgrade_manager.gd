@@ -33,7 +33,26 @@ var pool: Array = [
 	{"id": "speed_3", "name": "Afterburners", "cost": 30, "description": "+150 Move Speed", "effect_type": "Speed", "effect_value": 150.0},
 	{"id": "stamina_3", "name": "Infinite Reactor", "cost": 35, "description": "+100 Max Stamina", "effect_type": "Stamina", "effect_value": 100.0},
 	{"id": "regen_3", "name": "Cryo-System", "cost": 40, "description": "+20 Stamina Regen", "effect_type": "Regen", "effect_value": 20.0},
+
+	# --- SPECIAL EFFECTS ---
+	{"id": "effect_explode_1", "name": "Volatile Core", "cost": 2, "description": "20% Chance for enemies to explode on death (50 Dmg)", "effect_type": "Explosive", "effect_value": 0.2},
+	{"id": "effect_explode_2", "name": "Unstable Isotope", "cost": 2, "description": "+20% Explosion Chance", "effect_type": "Explosive", "effect_value": 0.2},
+	{"id": "effect_vamp_1", "name": "Leech System", "cost": 2, "description": "5% Chance to heal 2 HP on kill", "effect_type": "Vampire", "effect_value": 0.05},
+	{"id": "effect_thorns_1", "name": "Reactive Armor", "cost": 2, "description": "Deal 10 DPS to touching enemies", "effect_type": "Thorns", "effect_value": 10.0},
+	{"id": "effect_thorns_2", "name": "Spiked Plating", "cost": 2, "description": "+15 Thorns DPS", "effect_type": "Thorns", "effect_value": 15.0},
 ]
+
+# Level 2s: only include if player has the corresponding stat > 0
+var prerequisites: Dictionary = {
+	"effect_thorns_2": "thorns_damage",
+	"effect_explode_2": "explosive_chance",
+}
+# Level 1s: exclude if player already has that stat > 0 (prevent buying twice)
+var level1_exclude_if: Dictionary = {
+	"effect_explode_1": "explosive_chance",
+	"effect_thorns_1": "thorns_damage",
+	"effect_vamp_1": "vampire_chance",
+}
 
 func _pick_one_from(available: Array) -> Dictionary:
 	var idx := randi() % available.size()
@@ -45,16 +64,54 @@ func _index_of_item_in(arr: Array, item: Dictionary) -> int:
 			return i
 	return -1
 
-func get_random_upgrades(count: int, player_scrap: int) -> Array:
-	var result: Array = []
-	var remaining: Array = []
-	for p in pool:
-		remaining.append(p.duplicate())
+func _meets_prerequisite(item_id: StringName, player: Node) -> bool:
+	if not prerequisites.has(item_id):
+		return true
+	var prop: StringName = prerequisites[item_id]
+	var val = player.get(prop)
+	if val == null:
+		return false
+	if val is float:
+		return (val as float) > 0.0
+	if val is int:
+		return (val as int) > 0
+	return false
 
-	# Slot 1: Guaranteed affordable (cost <= player_scrap), or cheapest if none
+func _should_exclude_level1(item_id: StringName, player: Node) -> bool:
+	if not level1_exclude_if.has(item_id):
+		return false
+	var prop: StringName = level1_exclude_if[item_id]
+	var val = player.get(prop)
+	if val == null:
+		return false
+	if val is float:
+		return (val as float) > 0.0
+	if val is int:
+		return (val as int) > 0
+	return false
+
+func _build_valid_pool(player: Node) -> Array:
+	var valid: Array = []
+	for item in pool:
+		if _should_exclude_level1(item.id, player):
+			continue
+		if not _meets_prerequisite(item.id, player):
+			continue
+		valid.append(item.duplicate())
+	return valid
+
+func get_random_upgrades(count: int, player: Node) -> Array:
+	var result: Array = []
+	var valid_pool := _build_valid_pool(player)
+	var remaining: Array = []
+	for item in valid_pool:
+		remaining.append(item.duplicate())
+	var currency: int = player.get("currency") if player.get("currency") != null else 0
+
+	# Slot 1: Guaranteed affordable (cost <= currency), or cheapest if none
 	var affordable: Array = []
 	for item in remaining:
-		if item.cost <= player_scrap:
+		if item.cost <= currency:
 			affordable.append(item)
 	var chosen: Dictionary
 	if affordable.size() > 0:
@@ -70,25 +127,30 @@ func get_random_upgrades(count: int, player_scrap: int) -> Array:
 	if count <= 1:
 		return result
 
-	# Slot 2: Reach goal — cost slightly higher than player_scrap (encourage saving)
-	var reach_goal: Array = []
-	var max_reach: int = player_scrap + 8
-	for item in remaining:
-		if item.cost > player_scrap and item.cost <= max_reach:
-			reach_goal.append(item)
-	if reach_goal.size() > 0:
-		chosen = _pick_one_from(reach_goal)
-	else:
-		chosen = _pick_one_from(remaining)
-	result.append(chosen)
-	idx = _index_of_item_in(remaining, chosen)
-	if idx >= 0:
-		remaining.remove_at(idx)
+	# Slot 2: 50% Affordable, 50% Reach Goal (currency to currency + 15)
+	if remaining.size() > 0:
+		var affordable_s2: Array = []
+		var reach_goal: Array = []
+		for item in remaining:
+			if item.cost <= currency:
+				affordable_s2.append(item)
+			elif item.cost <= currency + 15:
+				reach_goal.append(item)
+		if randf() < 0.5 and affordable_s2.size() > 0:
+			chosen = _pick_one_from(affordable_s2)
+		elif reach_goal.size() > 0:
+			chosen = _pick_one_from(reach_goal)
+		else:
+			chosen = _pick_one_from(remaining)
+		result.append(chosen)
+		idx = _index_of_item_in(remaining, chosen)
+		if idx >= 0:
+			remaining.remove_at(idx)
 
 	if count <= 2:
 		return result
 
-	# Slot 3: Random from whole remaining pool
+	# Slot 3: Wildcard — any item from remaining valid pool
 	if remaining.size() > 0:
 		chosen = _pick_one_from(remaining)
 		result.append(chosen)

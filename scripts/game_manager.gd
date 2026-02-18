@@ -7,7 +7,12 @@ const ENEMY_TANK_SCENE := preload("res://scenes/enemy_tank.tscn") as PackedScene
 const ENEMY_BOSS_SCENE := preload("res://scenes/enemy_boss.tscn") as PackedScene
 const HAZARD_SCENE := preload("res://scenes/hazard.tscn") as PackedScene
 const BOSS_UI_SCENE := preload("res://scenes/boss_ui.tscn") as PackedScene
+const CRATE_SCENE := preload("res://scenes/crate.tscn") as PackedScene
 const BOSS_SCRAP_REWARD := 50
+const CRATE_SPAWN_INTERVAL_MIN := 8.0
+const CRATE_SPAWN_INTERVAL_MAX := 15.0
+const CRATE_SPAWN_SAFE_DISTANCE := 350.0
+const CRATE_SPAWN_ATTEMPTS := 20
 const CHARGER_SPAWN_CHANCE := 0.2
 const SHOOTER_SPAWN_CHANCE := 0.15
 const TANK_SPAWN_CHANCE := 0.15
@@ -33,6 +38,8 @@ var boss_active := false
 @onready var hazards_container: Node2D = $"../Hazards"
 
 var upgrade_manager: Node
+var crates_container: Node2D
+var _crate_spawn_timer := 0.0
 var shop_ui: CanvasLayer
 var boss_ui: CanvasLayer
 
@@ -60,6 +67,13 @@ func _ready() -> void:
 		hazards_node.name = "Hazards"
 		get_parent().add_child(hazards_node)
 	hazards_container = hazards_node
+	var crates_node := get_parent().get_node_or_null("Crates")
+	if crates_node == null:
+		crates_node = Node2D.new()
+		crates_node.name = "Crates"
+		get_parent().call_deferred("add_child", crates_node)
+	crates_container = crates_node
+	_crate_spawn_timer = randf_range(CRATE_SPAWN_INTERVAL_MIN, CRATE_SPAWN_INTERVAL_MAX)
 	boss_ui = BOSS_UI_SCENE.instantiate() as CanvasLayer
 	get_parent().call_deferred("add_child", boss_ui)
 	call_deferred("_start_next_wave")
@@ -72,6 +86,11 @@ func _process(delta: float) -> void:
 	if boss_active:
 		return
 	wave_timer -= delta
+	if crates_container != null:
+		_crate_spawn_timer -= delta
+		if _crate_spawn_timer <= 0.0:
+			_crate_spawn_timer = randf_range(CRATE_SPAWN_INTERVAL_MIN, CRATE_SPAWN_INTERVAL_MAX)
+			_spawn_crate()
 	if wave_timer < 0.0:
 		wave_timer = 0.0
 	hud.set_countdown(wave_timer)
@@ -172,6 +191,31 @@ func _spawn_enemy() -> void:
 		break
 	enemy.global_position = pos
 	enemies_container.add_child(enemy)
+
+func _spawn_crate() -> void:
+	if crates_container == null:
+		return
+	var center_x := (SPAWN_BOUNDS_MIN.x + SPAWN_BOUNDS_MAX.x) * 0.5
+	var center_y := (SPAWN_BOUNDS_MIN.y + SPAWN_BOUNDS_MAX.y) * 0.5
+	var pos: Vector2
+	for attempt in CRATE_SPAWN_ATTEMPTS:
+		var zone := randi() % 5
+		match zone:
+			0:
+				pos = Vector2(randf_range(center_x - 400, center_x + 400), randf_range(center_y - 300, center_y + 300))
+			1:
+				pos = Vector2(randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MIN.x + 400), randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MIN.y + 300))
+			2:
+				pos = Vector2(randf_range(SPAWN_BOUNDS_MAX.x - 400, SPAWN_BOUNDS_MAX.x), randf_range(SPAWN_BOUNDS_MIN.y, SPAWN_BOUNDS_MIN.y + 300))
+			3:
+				pos = Vector2(randf_range(SPAWN_BOUNDS_MIN.x, SPAWN_BOUNDS_MIN.x + 400), randf_range(SPAWN_BOUNDS_MAX.y - 300, SPAWN_BOUNDS_MAX.y))
+			_:
+				pos = Vector2(randf_range(SPAWN_BOUNDS_MAX.x - 400, SPAWN_BOUNDS_MAX.x), randf_range(SPAWN_BOUNDS_MAX.y - 300, SPAWN_BOUNDS_MAX.y))
+		if pos.distance_to(player.global_position) >= CRATE_SPAWN_SAFE_DISTANCE and not _is_pos_near_hazard(pos):
+			break
+	var crate := CRATE_SCENE.instantiate() as Node2D
+	crate.global_position = pos
+	crates_container.add_child(crate)
 
 func _is_pos_near_hazard(pos: Vector2) -> bool:
 	for hazard in get_tree().get_nodes_in_group("hazards"):

@@ -6,12 +6,9 @@ signal currency_changed(amount: int)
 
 const BASE_SPEED := 600.0
 const BASE_HEALTH_MAX := 100.0
-const DASH_SPEED := 1200.0
 const DASH_DURATION := 0.45
-const DASH_COOLDOWN := 0.8
 const BASE_STAMINA_MAX := 100.0
 const STAMINA_DASH_COST := 25.0
-const STAMINA_REGEN_PER_SEC := 30.0
 const INVINCIBILITY_DURATION := 1.0
 const HIT_ALPHA_PULSE_DURATION := 0.5
 const BASE_DASH_DAMAGE := 20.0
@@ -28,7 +25,9 @@ var stamina: float = BASE_STAMINA_MAX
 var speed: float = BASE_SPEED
 var dash_damage: float = BASE_DASH_DAMAGE
 var dash_knockback_strength: float = DASH_KNOCKBACK_STRENGTH
-var stamina_regen_per_sec: float = STAMINA_REGEN_PER_SEC
+var dash_speed: float = 1200.0
+var dash_cooldown_max: float = 0.8
+var stamina_regen_per_sec: float = 30.0
 var currency: int = 0
 var invincibility_timer := 0.0
 var hit_effect_timer := 0.0
@@ -38,10 +37,15 @@ var dash_direction := Vector2.ZERO
 var dash_cooldown_timer := 0.0
 var knockback_velocity := Vector2.ZERO
 var _dash_hit_enemies: Array[Node] = []
+var explosive_chance: float = 0.0
+var vampire_chance: float = 0.0
+var thorns_damage: float = 0.0
 
 @export var dash_sfx: AudioStream
 
 @onready var dash_damage_area: Area2D = $DashDamageArea
+@onready var orbital_container: Node2D = $OrbitalContainer
+@onready var thorns_area: Area2D = $OrbitalContainer/ThornsArea
 @onready var ghosts_container: Node2D = $Ghosts
 @onready var ghost1: Sprite2D = $Ghosts/Ghost1
 @onready var ghost2: Sprite2D = $Ghosts/Ghost2
@@ -53,20 +57,28 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	invincibility_timer = maxf(0.0, invincibility_timer - delta)
 	hit_effect_timer = maxf(0.0, hit_effect_timer - delta)
+	if orbital_container:
+		orbital_container.visible = thorns_damage > 0.0
+		if thorns_damage > 0.0:
+			orbital_container.rotation += 2.0 * delta
 	_update_hit_effect()
 	_update_ghosts()
 
 func _physics_process(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
+	if thorns_damage > 0.0 and thorns_area:
+		for body in thorns_area.get_overlapping_bodies():
+			if body.is_in_group("enemies"):
+				body.take_damage(thorns_damage * delta)
 
 	if is_dashing:
-		velocity = dash_direction * DASH_SPEED
+		velocity = dash_direction * dash_speed
 		move_and_slide()
 		_check_dash_damage()
 		dash_timer -= delta
 		if dash_timer <= 0.0:
 			is_dashing = false
-			dash_cooldown_timer = DASH_COOLDOWN
+			dash_cooldown_timer = dash_cooldown_max
 		return
 
 	# Knocked back: ignore input, apply friction, show stunned
@@ -132,6 +144,10 @@ func add_currency(amount: int) -> void:
 	currency += amount
 	currency_changed.emit(currency)
 
+func heal(amount: float) -> void:
+	health = minf(health + amount, health_max)
+	health_changed.emit(health, health_max)
+
 func apply_knockback(force: Vector2) -> void:
 	knockback_velocity = force
 
@@ -148,15 +164,35 @@ func take_damage(amount: float) -> bool:
 		queue_free()
 	return true
 
+const DASH_CRATE_HIT_RADIUS := 50.0
+
 func _check_dash_damage() -> void:
 	var knockback_dir := _get_magnetized_knockback_dir(global_position, dash_direction)
 	if knockback_dir == Vector2.ZERO:
 		knockback_dir = dash_direction
+	# Check overlapping bodies (enemies + destructibles via Area2D)
 	for body in dash_damage_area.get_overlapping_bodies():
-		if body.is_in_group("enemies") and body not in _dash_hit_enemies:
+		if body.is_in_group("destructible") and body.has_method("take_damage"):
+			body.take_damage(dash_damage)
+			$Camera2D.apply_shake(4.0, 0.08)
+		elif body.is_in_group("enemies") and body not in _dash_hit_enemies:
 			body.take_damage(dash_damage, knockback_dir, dash_knockback_strength)
 			_dash_hit_enemies.append(body)
 			$Camera2D.apply_shake(8.0, 0.15)
+	# Proximity check for destructibles (crates) so dash always hits when close
+	for node in get_tree().get_nodes_in_group("destructible"):
+		var destructible := node as Node2D
+		if destructible == null or not destructible.has_method("take_damage"):
+			continue
+		var to_crate := destructible.global_position - global_position
+		var dist := to_crate.length()
+		if dist > DASH_CRATE_HIT_RADIUS or dist < 0.01:
+			continue
+		if to_crate.normalized().dot(dash_direction) < 0.3:
+			continue
+		destructible.take_damage(dash_damage)
+		$Camera2D.apply_shake(4.0, 0.08)
+		break
 
 func _get_magnetized_knockback_dir(start_pos: Vector2, original_dir: Vector2) -> Vector2:
 	if original_dir.length() < 0.01:

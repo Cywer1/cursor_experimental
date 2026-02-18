@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://dj3qsblq07v4x"]
+[gd_scene load_steps=9 format=3 uid="uid://dj3qsblq07v4x"]
 
 [ext_resource type="Script" uid="uid://bldbl6fqu5bii" path="res://scripts/player.gd" id="1_3vyb7"]
 [ext_resource type="AudioStream" uid="uid://1sowv51g6lox" path="res://assets/sounds/player_dash.wav" id="2_dqkch"]
 [ext_resource type="Texture2D" uid="uid://vwdqa486sveg" path="res://assets/sprites/player_texture.png" id="2_g2els"]
 [ext_resource type="Script" uid="uid://brbkc0h338xdl" path="res://scripts/camera_shake.gd" id="3_camera_shake"]
+[ext_resource type="Texture2D" uid="uid://cw2axeqtwq2vl" path="res://assets/sprites/vine_placeholder.png" id="5_qlg0r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4flbx"]
 size = Vector2(35, 55)
@@ -11,12 +12,16 @@ size = Vector2(35, 55)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dash"]
 size = Vector2(40, 60)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_tuyoq"]
+radius = 139.09
+
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_mask = 4
 script = ExtResource("1_3vyb7")
 dash_sfx = ExtResource("2_dqkch")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 57.317, 1)
 texture = ExtResource("2_g2els")
 
 [node name="Ghosts" type="Node2D" parent="."]
@@ -51,3 +56,27 @@ shape = SubResource("RectangleShape2D_dash")
 position_smoothing_enabled = true
 position_smoothing_speed = 10.0
 script = ExtResource("3_camera_shake")
+
+[node name="OrbitalContainer" type="Node2D" parent="."]
+
+[node name="ThornsArea" type="Area2D" parent="OrbitalContainer"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OrbitalContainer/ThornsArea"]
+shape = SubResource("CircleShape2D_tuyoq")
+
+[node name="VinePlaceholder" type="Sprite2D" parent="OrbitalContainer"]
+position = Vector2(-109, -84)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_qlg0r")
+
+[node name="VinePlaceholder2" type="Sprite2D" parent="OrbitalContainer"]
+position = Vector2(114, -80)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_qlg0r")
+
+[node name="VinePlaceholder3" type="Sprite2D" parent="OrbitalContainer"]
+position = Vector2(-1, 141)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_qlg0r")

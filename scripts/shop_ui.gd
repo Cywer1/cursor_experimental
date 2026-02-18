@@ -92,7 +92,7 @@ func open_shop(tree: SceneTree = null) -> void:
 		return
 	for child in container.get_children():
 		child.queue_free()
-	var upgrades: Array = _upgrade_manager.get_random_upgrades(3, _player.currency)
+	var upgrades: Array = _upgrade_manager.get_random_upgrades(3, _player)
 	for upgrade: Dictionary in upgrades:
 		var btn := Button.new()
 		btn.set_meta("upgrade", upgrade)
@@ -147,6 +147,12 @@ func _apply_effect(upgrade: Dictionary) -> void:
 			_player.dash_knockback_strength += value
 		"Regen":
 			_player.stamina_regen_per_sec += value
+		"Explosive":
+			_player.explosive_chance += value
+		"Vampire":
+			_player.vampire_chance += value
+		"Thorns":
+			_player.thorns_damage += value
 
 func _on_close_pressed() -> void:
 	_close_shop()

@@ -23,7 +23,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	hit_cooldown_timer = maxf(0.0, hit_cooldown_timer - delta)
-	_check_hitbox_overlap()
+	_check_hitbox_overlap(delta)
 	if is_knocked_back:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 		knockback_velocity = velocity

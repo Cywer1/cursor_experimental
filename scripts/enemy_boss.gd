@@ -12,6 +12,8 @@ const SUMMON_OFFSET_RADIUS := 80.0
 const KNOCKBACK_RESISTANCE := 0.1
 const CONTACT_KNOCKBACK := 1000.0
 const PROJECTILE_BASE_SPEED := 400.0
+const INTERCEPT_TIME := 0.5
+const STRAFE_DISTANCE := 300.0
 
 const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn") as PackedScene
 const ENEMY_CHASER_SCENE := preload("res://scenes/enemy.tscn") as PackedScene
@@ -25,6 +27,12 @@ var nova_timer: float = 0.0
 var summon_timer: float = 0.0
 var _current_speed: float = BASE_SPEED
 var _bullet_speed_mult: float = 1.0
+var _enraged := false
+var _attack_interval_mult := 1.0
+var _strafe_clockwise: bool = true  # circling direction; chosen when entering strafe range
+var _was_in_strafe_range := false
+
+@onready var _sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
 	# Scaling by tier
@@ -40,6 +48,12 @@ func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockba
 	FloatingTextManager.show_damage(global_position, amount)
 	var reduced_strength := knockback_strength * KNOCKBACK_RESISTANCE
 	health -= amount
+	if health < max_health * 0.5 and not _enraged:
+		_enraged = true
+		if _sprite:
+			_sprite.modulate = Color(1, 0.2, 0.2)
+		_current_speed *= 1.5
+		_attack_interval_mult = 0.6
 	if knockback_force != Vector2.ZERO and reduced_strength > 0.0:
 		velocity = knockback_force.normalized() * reduced_strength
 		knockback_velocity = velocity
@@ -51,7 +65,7 @@ func take_damage(amount: float, knockback_force: Vector2 = Vector2.ZERO, knockba
 
 func _physics_process(delta: float) -> void:
 	hit_cooldown_timer = maxf(0.0, hit_cooldown_timer - delta)
-	_check_hitbox_overlap()
+	_check_hitbox_overlap(delta)
 	if is_knocked_back:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 		knockback_velocity = velocity
@@ -71,13 +85,13 @@ func _physics_process(delta: float) -> void:
 				state = State.SUMMON
 				velocity = Vector2.ZERO
 				_do_summon()
-				summon_timer = SUMMON_INTERVAL
+				summon_timer = SUMMON_INTERVAL * _attack_interval_mult
 				state = State.CHASE
 			elif nova_timer <= 0.0:
 				state = State.NOVA
 				velocity = Vector2.ZERO
 				_do_nova()
-				nova_timer = NOVA_INTERVAL
+				nova_timer = NOVA_INTERVAL * _attack_interval_mult
 				state = State.CHASE
 			else:
 				_chase_player(delta)
@@ -95,22 +109,39 @@ func _chase_player(_delta: float) -> void:
 	if player == null:
 		velocity = Vector2.ZERO
 		return
-	var direction := (player.global_position - global_position).normalized()
+	var target_pos := player.global_position + (player.velocity * INTERCEPT_TIME)
+	var dist_to_player := global_position.distance_to(player.global_position)
+	var in_strafe_range := dist_to_player < STRAFE_DISTANCE
+	if in_strafe_range and not _was_in_strafe_range:
+		_strafe_clockwise = randf() > 0.5
+	_was_in_strafe_range = in_strafe_range
+
+	var direction: Vector2
+	if in_strafe_range:
+		var dir_to_player := (player.global_position - global_position).normalized()
+		var strafe_dir := Vector2(-dir_to_player.y, dir_to_player.x) if _strafe_clockwise else Vector2(dir_to_player.y, -dir_to_player.x)
+		direction = strafe_dir
+	else:
+		direction = (target_pos - global_position).normalized()
 	for hazard in get_tree().get_nodes_in_group("hazards"):
 		var node := hazard as Node2D
 		if node != null:
 			var d := global_position.distance_to(node.global_position)
-			if d < HAZARD_AVOID_DISTANCE and d > 0.01:
+			if d < hazard_avoid_distance and d > 0.01:
 				direction += (global_position - node.global_position).normalized()
 	if direction.length() > 0.01:
 		direction = direction.normalized()
 	velocity = direction * _current_speed
 
-func _check_hitbox_overlap() -> void:
+func _check_hitbox_overlap(delta: float) -> void:
+	if is_knocked_back:
+		return
 	for body in hitbox.get_overlapping_bodies():
 		if body == self:
 			continue
 		if body.is_in_group("player"):
+			if body.get("thorns_damage") != null and body.thorns_damage > 0.0:
+				take_damage(body.thorns_damage * delta)
 			if hit_cooldown_timer <= 0.0 and body.take_damage(CONTACT_DAMAGE):
 				hit_cooldown_timer = HIT_COOLDOWN
 				var dir := (body.global_position - global_position).normalized()
@@ -120,9 +151,10 @@ func _check_hitbox_overlap() -> void:
 			break
 
 func _do_nova() -> void:
+	var random_rotation_offset := randf_range(0.0, TAU)
 	var step_angle := TAU / float(NOVA_PROJECTILE_COUNT)
 	for i in NOVA_PROJECTILE_COUNT:
-		var angle := step_angle * i
+		var angle := step_angle * i + random_rotation_offset
 		var dir := Vector2.from_angle(angle)
 		var proj := PROJECTILE_SCENE.instantiate() as Area2D
 		proj.global_position = global_position

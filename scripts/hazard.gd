@@ -21,7 +21,7 @@ func _on_body_entered(body: Node2D) -> void:
 		else:
 			body.apply_knockback(Vector2.RIGHT * PLAYER_KNOCKBACK_STRENGTH)
 	elif body.is_in_group("enemies"):
-		body.take_damage(damage_to_enemy)
+		body.take_hazard_damage(damage_to_enemy)
 		# If enemy survived, apply bounce so they don't get stuck
 		if body.get("health") != null and (body.get("health") as float) > 0.0:
 			body.take_damage(0.0, _bounce_direction(body), BOUNCE_STRENGTH)

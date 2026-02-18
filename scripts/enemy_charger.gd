@@ -38,6 +38,7 @@ var aim_direction := Vector2.RIGHT
 var charge_speed := 800.0
 var tired_rotation_speed := DASH_ROTATION_SPEED
 
+
 @onready var aim_line: Line2D = $AimLine
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var ghosts_container: Node2D = get_node_or_null("Ghosts")
@@ -46,6 +47,7 @@ var tired_rotation_speed := DASH_ROTATION_SPEED
 @onready var ghost3: Sprite2D = get_node_or_null("Ghosts/Ghost3")
 
 func _ready() -> void:
+	hazard_avoid_distance = 50.0
 	_setup_dashed_aim_line()
 	if ghosts_container != null:
 		ghosts_container.visible = false
@@ -64,7 +66,7 @@ func _setup_dashed_aim_line() -> void:
 
 func _physics_process(delta: float) -> void:
 	hit_cooldown_timer = maxf(0.0, hit_cooldown_timer - delta)
-	_check_hitbox_overlap()
+	_check_hitbox_overlap(delta)
 	if is_knocked_back:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 		knockback_velocity = velocity
@@ -124,7 +126,7 @@ func _chase_state(delta: float, player: CharacterBody2D) -> void:
 		var node := hazard as Node2D
 		if node != null:
 			var d := global_position.distance_to(node.global_position)
-			if d < HAZARD_AVOID_DISTANCE and d > 0.01:
+			if d < hazard_avoid_distance and d > 0.01:
 				var repulsion := (global_position - node.global_position).normalized() * HAZARD_REPULSION_STRENGTH
 				velocity += repulsion
 

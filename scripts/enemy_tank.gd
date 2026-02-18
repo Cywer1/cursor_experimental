@@ -23,17 +23,21 @@ func _chase_player(_delta: float) -> void:
 		var node := hazard as Node2D
 		if node != null:
 			var d := global_position.distance_to(node.global_position)
-			if d < HAZARD_AVOID_DISTANCE and d > 0.01:
+			if d < hazard_avoid_distance and d > 0.01:
 				direction += (global_position - node.global_position).normalized()
 	if direction.length() > 0.01:
 		direction = direction.normalized()
 	velocity = direction * TANK_SPEED
 
-func _check_hitbox_overlap() -> void:
+func _check_hitbox_overlap(delta: float) -> void:
+	if is_knocked_back:
+		return
 	for body in hitbox.get_overlapping_bodies():
 		if body == self:
 			continue
 		if body.is_in_group("player"):
+			if body.get("thorns_damage") != null and body.thorns_damage > 0.0:
+				take_damage(body.thorns_damage * delta)
 			if hit_cooldown_timer <= 0.0 and body.take_damage(CONTACT_DAMAGE):
 				hit_cooldown_timer = HIT_COOLDOWN
 				var dir := (body.global_position - global_position).normalized()

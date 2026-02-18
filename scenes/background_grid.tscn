@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://qtevudi4u21q"]
+
+[ext_resource type="Script" uid="uid://b8rfmijxe34r0" path="res://scripts/background_grid.gd" id="1_script"]
+
+[node name="BackgroundGrid" type="ParallaxBackground"]
+script = ExtResource("1_script")
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="."]
+motion_mirroring = Vector2(128, 128)
+
+[node name="BackgroundFill" type="ColorRect" parent="ParallaxLayer"]
+offset_left = -5000.0
+offset_top = -5000.0
+offset_right = 5000.0
+offset_bottom = 5000.0
+color = Color(0.0666667, 0.0666667, 0.0941176, 1)
+
+[node name="GridPattern" type="TextureRect" parent="ParallaxLayer"]
+offset_left = -2000.0
+offset_top = -2000.0
+offset_right = 2000.0
+offset_bottom = 2000.0
+expand_mode = 1
+stretch_mode = 1
