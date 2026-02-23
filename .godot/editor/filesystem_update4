@@ -1,5 +1,6 @@
 res://scenes/main.tscn
 res://scenes/enemy_boss.tscn
 res://scenes/pause_menu.tscn
-res://scripts/game_manager.gd
-res://scripts/player.gd
+res://scenes/victory_ui.tscn
+res://scenes/menu.tscn
+res://scenes/tutorial_ui.tscn

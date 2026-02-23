@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal quit_to_desktop_requested
+
 var _shop_ui: CanvasLayer = null
 
 @onready var _resume_button: Button = $Panel/CenterContainer/VBoxContainer/ResumeButton
@@ -34,6 +36,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		get_tree().paused = true
 		show()
+		_resume_button.grab_focus()
 
 
 func _on_resume_pressed() -> void:
@@ -47,4 +50,4 @@ func _on_restart_pressed() -> void:
 
 
 func _on_quit_pressed() -> void:
-	get_tree().quit()
+	quit_to_desktop_requested.emit()

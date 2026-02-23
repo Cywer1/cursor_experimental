@@ -104,6 +104,13 @@ func open_shop(tree: SceneTree = null) -> void:
 			btn.modulate = Color(0.7, 0.4, 0.4)
 		btn.pressed.connect(_buy_upgrade.bind(upgrade, btn))
 		container.add_child(btn)
+	var shop_children := container.get_children()
+	if shop_children.size() > 0:
+		(shop_children[0] as Button).grab_focus()
+		for btn in shop_children:
+			(btn as Button).focus_neighbor_bottom = btn.get_path_to(close_button)
+		var mid_btn := shop_children[shop_children.size() / 2] as Button
+		close_button.focus_neighbor_top = close_button.get_path_to(mid_btn)
 
 func _try_buy_at_index(index: int) -> void:
 	if container == null:

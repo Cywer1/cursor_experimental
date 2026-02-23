@@ -1,0 +1,74 @@
+[gd_scene load_steps=2 format=3 uid="uid://cw5qwt443ahud"]
+
+[ext_resource type="Script" uid="uid://7fudmnoyq01d" path="res://scripts/tutorial_ui.gd" id="1_tutorial"]
+
+[node name="TutorialUI" type="CanvasLayer"]
+process_mode = 3
+layer = 90
+script = ExtResource("1_tutorial")
+
+[node name="RootControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MoveLeftLabel" type="Label" parent="RootControl"]
+layout_mode = 0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -50.0
+offset_right = 280.0
+offset_bottom = 50.0
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "WASD / ARROWS
+to Move"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DashLabel" type="Label" parent="RootControl"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -60.0
+offset_right = 220.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 36
+text = "DASH into enemies
+to damage them!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DashInputLabel" type="Label" parent="RootControl"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -50.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "LSHIFT
+to Dash"
+horizontal_alignment = 1
+vertical_alignment = 1

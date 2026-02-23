@@ -1,11 +1,15 @@
 extends Control
 
 @onready var title_label: Label = $UILayer/CenterContainer/VBoxContainer/TitleLabel
+@onready var high_score_label: Label = $UILayer/CenterContainer/VBoxContainer/HighScoreLabel
+@onready var total_scrap_label: Label = $UILayer/CenterContainer/VBoxContainer/TotalScrapLabel
 @onready var play_button: Button = $UILayer/CenterContainer/VBoxContainer/PlayButton
 @onready var quit_button: Button = $UILayer/CenterContainer/VBoxContainer/QuitButton
 
 
 func _ready() -> void:
+	high_score_label.text = "Best Run: Wave %d" % SaveManager.high_score
+	total_scrap_label.text = "Total Scrap: %d" % SaveManager.total_scrap
 	play_button.pressed.connect(_on_play_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	play_button.grab_focus()

@@ -13,6 +13,7 @@ func _ready() -> void:
 func show_victory() -> void:
 	show()
 	get_tree().paused = true
+	play_again_button.grab_focus()
 
 
 func _on_play_again_pressed() -> void:

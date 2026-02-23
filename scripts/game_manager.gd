@@ -43,6 +43,7 @@ var upgrade_manager: Node
 var crates_container: Node2D
 var _crate_spawn_timer := 0.0
 var shop_ui: CanvasLayer
+var pause_menu: CanvasLayer
 var boss_ui: CanvasLayer
 var victory_ui: CanvasLayer
 
@@ -64,9 +65,10 @@ func _ready() -> void:
 	get_parent().call_deferred("add_child", shop_ui)
 	shop_ui.setup(upgrade_manager, player, hud)
 	shop_ui.shop_closed.connect(_on_shop_closed)
-	var pause_menu := PAUSE_MENU_SCENE.instantiate() as CanvasLayer
+	pause_menu = PAUSE_MENU_SCENE.instantiate() as CanvasLayer
 	get_parent().call_deferred("add_child", pause_menu)
 	pause_menu.set_shop_ui(shop_ui)
+	pause_menu.quit_to_desktop_requested.connect(_on_pause_menu_quit_to_desktop)
 	var hazards_node := get_parent().get_node_or_null("Hazards")
 	if hazards_node == null:
 		hazards_node = Node2D.new()
@@ -175,6 +177,10 @@ func _on_boss_died() -> void:
 	if current_wave >= 20:
 		game_over = true
 		get_tree().call_group("enemies", "queue_free")
+		if current_wave > SaveManager.high_score:
+			SaveManager.high_score = current_wave
+		SaveManager.total_scrap += player.currency
+		SaveManager.save_game()
 		victory_ui.show_victory()
 	else:
 		_start_wave_break()
@@ -270,7 +276,7 @@ func _start_wave_break() -> void:
 	var remaining := WAVE_DELAY
 	hud.show_countdown(remaining)
 	while remaining > 0.0 and not game_over:
-		await get_tree().create_timer(0.1).timeout
+		await get_tree().create_timer(0.1, false).timeout
 		remaining -= 0.1
 		if remaining < 0.0:
 			remaining = 0.0
@@ -294,6 +300,17 @@ func _check_wave_clear() -> void:
 func _on_shop_closed() -> void:
 	_start_next_wave()
 
+func _on_pause_menu_quit_to_desktop() -> void:
+	if current_wave > SaveManager.high_score:
+		SaveManager.high_score = current_wave
+	SaveManager.total_scrap += player.currency
+	SaveManager.save_game()
+	get_tree().quit()
+
 func _on_player_died() -> void:
 	game_over = true
+	if current_wave > SaveManager.high_score:
+		SaveManager.high_score = current_wave
+	SaveManager.total_scrap += player.currency
+	SaveManager.save_game()
 	game_over_ui.show_game_over()

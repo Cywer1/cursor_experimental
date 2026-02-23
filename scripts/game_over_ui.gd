@@ -11,6 +11,7 @@ func _ready() -> void:
 func show_game_over() -> void:
 	show()
 	get_tree().paused = true
+	retry_button.grab_focus()
 
 func _on_retry_pressed() -> void:
 	get_tree().paused = false

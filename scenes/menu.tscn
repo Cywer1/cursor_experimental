@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cmenu_scene"]
+[gd_scene load_steps=3 format=3 uid="uid://bqt2xqeq8yp14"]
 
-[ext_resource type="Script" path="res://scripts/menu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://b5tws233oq8wm" path="res://scripts/menu.gd" id="1_menu"]
 [ext_resource type="PackedScene" uid="uid://qtevudi4u21q" path="res://scenes/background_grid.tscn" id="2_grid"]
 
 [node name="Menu" type="Control"]
@@ -23,7 +23,8 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(1280, 720)
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
 
 [node name="World" type="Node2D" parent="SubViewportContainer/SubViewport"]
 
@@ -43,9 +44,9 @@ grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UILayer/CenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 32
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_constants/separation = 32
 
 [node name="TitleLabel" type="Label" parent="UILayer/CenterContainer/VBoxContainer"]
 layout_mode = 2
@@ -54,16 +55,26 @@ text = "NEON SURVIVOR"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="HighScoreLabel" type="Label" parent="UILayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Best Run: Wave 0"
+horizontal_alignment = 1
+
+[node name="TotalScrapLabel" type="Label" parent="UILayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Total Scrap: 0"
+horizontal_alignment = 1
+
 [node name="PlayButton" type="Button" parent="UILayer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Play"
 focus_neighbor_top = NodePath("../QuitButton")
 focus_neighbor_bottom = NodePath("../QuitButton")
+text = "Play"
 
 [node name="QuitButton" type="Button" parent="UILayer/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Quit"
 focus_neighbor_top = NodePath("../PlayButton")
 focus_neighbor_bottom = NodePath("../PlayButton")
+text = "Quit"

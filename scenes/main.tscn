@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bqx8ym3n2k5wp"]
+[gd_scene load_steps=10 format=3 uid="uid://bqx8ym3n2k5wp"]
 
 [ext_resource type="PackedScene" uid="uid://dj3qsblq07v4x" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://d15toynwi7hhi" path="res://scenes/walls.tscn" id="2_0wfyh"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dn5ajkmtj54fy" path="res://scripts/game_over_ui.gd" id="5_gameover"]
 [ext_resource type="Script" uid="uid://dxqfvkl0pwgxd" path="res://scripts/game_manager.gd" id="6_gamemanager"]
 [ext_resource type="PackedScene" uid="uid://qtevudi4u21q" path="res://scenes/background_grid.tscn" id="7_o6xl0"]
+[ext_resource type="PackedScene" uid="uid://cw5qwt443ahud" path="res://scenes/tutorial_ui.tscn" id="8_tutorial"]
 
 [sub_resource type="Environment" id="Environment_tefeu"]
 background_mode = 3
@@ -97,3 +98,5 @@ text = "Quit"
 environment = SubResource("Environment_tefeu")
 
 [node name="BackgroundGrid" parent="." instance=ExtResource("7_o6xl0")]
+
+[node name="TutorialUI" parent="." instance=ExtResource("8_tutorial")]
