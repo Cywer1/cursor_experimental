@@ -18,6 +18,8 @@ const SHOOTER_SPAWN_CHANCE := 0.15
 const TANK_SPAWN_CHANCE := 0.15
 const TANK_WAVE_MIN := 4
 const SHOP_SCENE := preload("res://scenes/shop.tscn") as PackedScene
+const PAUSE_MENU_SCENE := preload("res://scenes/pause_menu.tscn") as PackedScene
+const VICTORY_UI_SCENE := preload("res://scenes/victory_ui.tscn") as PackedScene
 const SPAWN_BOUNDS_MIN := Vector2(100, 100)
 const SPAWN_BOUNDS_MAX := Vector2(2540, 1520)
 const WAVE_DELAY := 2.5
@@ -42,6 +44,7 @@ var crates_container: Node2D
 var _crate_spawn_timer := 0.0
 var shop_ui: CanvasLayer
 var boss_ui: CanvasLayer
+var victory_ui: CanvasLayer
 
 func _ready() -> void:
 	# #region agent log
@@ -61,6 +64,9 @@ func _ready() -> void:
 	get_parent().call_deferred("add_child", shop_ui)
 	shop_ui.setup(upgrade_manager, player, hud)
 	shop_ui.shop_closed.connect(_on_shop_closed)
+	var pause_menu := PAUSE_MENU_SCENE.instantiate() as CanvasLayer
+	get_parent().call_deferred("add_child", pause_menu)
+	pause_menu.set_shop_ui(shop_ui)
 	var hazards_node := get_parent().get_node_or_null("Hazards")
 	if hazards_node == null:
 		hazards_node = Node2D.new()
@@ -76,6 +82,8 @@ func _ready() -> void:
 	_crate_spawn_timer = randf_range(CRATE_SPAWN_INTERVAL_MIN, CRATE_SPAWN_INTERVAL_MAX)
 	boss_ui = BOSS_UI_SCENE.instantiate() as CanvasLayer
 	get_parent().call_deferred("add_child", boss_ui)
+	victory_ui = VICTORY_UI_SCENE.instantiate() as CanvasLayer
+	get_parent().call_deferred("add_child", victory_ui)
 	call_deferred("_start_next_wave")
 
 func _process(delta: float) -> void:
@@ -164,7 +172,12 @@ func _on_boss_died() -> void:
 	player.add_currency(BOSS_SCRAP_REWARD)
 	boss_ui.hide_boss_ui()
 	boss_active = false
-	_start_wave_break()
+	if current_wave >= 20:
+		game_over = true
+		get_tree().call_group("enemies", "queue_free")
+		victory_ui.show_victory()
+	else:
+		_start_wave_break()
 
 func _spawn_enemy() -> void:
 	var use_tank := current_wave >= TANK_WAVE_MIN and randf() < TANK_SPAWN_CHANCE
