@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cavv76wleeplj"]
+[gd_scene load_steps=3 format=3 uid="uid://cavv76wleeplj"]
 
 [ext_resource type="Script" uid="uid://p5e62qmnuuij" path="res://scripts/victory_ui.gd" id="1_victory"]
+[ext_resource type="Theme" uid="uid://buwxcuvkr88b" path="res://assets/main_theme.tres" id="2_ocf08"]
 
 [node name="VictoryUI" type="CanvasLayer"]
 process_mode = 3
@@ -45,9 +46,11 @@ horizontal_alignment = 1
 [node name="PlayAgainButton" type="Button" parent="Panel/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
+theme = ExtResource("2_ocf08")
 text = "Play Again"
 
 [node name="MainMenuButton" type="Button" parent="Panel/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
+theme = ExtResource("2_ocf08")
 text = "Main Menu"

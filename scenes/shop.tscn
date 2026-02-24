@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://b8ee6rt110053"]
+[gd_scene load_steps=3 format=3 uid="uid://b8ee6rt110053"]
 
 [ext_resource type="Script" uid="uid://bg20p8k5ypxch" path="res://scripts/shop_ui.gd" id="1_shop"]
+[ext_resource type="Theme" uid="uid://buwxcuvkr88b" path="res://assets/main_theme.tres" id="2_xfvoa"]
 
 [node name="Shop" type="CanvasLayer"]
 layer = 10
@@ -49,4 +50,5 @@ layout_mode = 2
 [node name="CloseButton" type="Button" parent="Panel/CenterContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
+theme = ExtResource("2_xfvoa")
 text = "Continue"

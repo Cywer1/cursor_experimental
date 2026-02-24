@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bqt2xqeq8yp14"]
+[gd_scene load_steps=4 format=3 uid="uid://bqt2xqeq8yp14"]
 
 [ext_resource type="Script" uid="uid://b5tws233oq8wm" path="res://scripts/menu.gd" id="1_menu"]
 [ext_resource type="PackedScene" uid="uid://qtevudi4u21q" path="res://scenes/background_grid.tscn" id="2_grid"]
+[ext_resource type="Theme" uid="uid://buwxcuvkr88b" path="res://assets/main_theme.tres" id="3_con2f"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -70,6 +71,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 focus_neighbor_top = NodePath("../QuitButton")
 focus_neighbor_bottom = NodePath("../QuitButton")
+theme = ExtResource("3_con2f")
 text = "Play"
 
 [node name="QuitButton" type="Button" parent="UILayer/CenterContainer/VBoxContainer"]
@@ -77,4 +79,5 @@ layout_mode = 2
 size_flags_horizontal = 4
 focus_neighbor_top = NodePath("../PlayButton")
 focus_neighbor_bottom = NodePath("../PlayButton")
+theme = ExtResource("3_con2f")
 text = "Quit"

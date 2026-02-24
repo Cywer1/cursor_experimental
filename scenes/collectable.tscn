@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://mf35tl7ppyxs"]
 
 [ext_resource type="Script" uid="uid://c54lb1uvseywm" path="res://scripts/collectable.gd" id="1_collectable"]
-[ext_resource type="Texture2D" uid="uid://dy4ippfrd8ewn" path="res://icon.svg" id="2_llfh3"]
+[ext_resource type="Texture2D" uid="uid://coy1tej5n6wbj" path="res://assets/sprites/scrap.png" id="2_llfh3"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_collect"]
 radius = 16.0
@@ -14,5 +14,6 @@ script = ExtResource("1_collectable")
 shape = SubResource("CircleShape2D_collect")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.3, 0.3)
+position = Vector2(1, -1)
+scale = Vector2(0.62963, 0.62963)
 texture = ExtResource("2_llfh3")

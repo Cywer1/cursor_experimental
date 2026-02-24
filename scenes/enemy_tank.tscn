@@ -2,13 +2,13 @@
 
 [ext_resource type="Script" uid="uid://g7jjnxxyq2ea" path="res://scripts/enemy_tank.gd" id="1_tank"]
 [ext_resource type="Script" uid="uid://bhthewnl54as2" path="res://scripts/enemy_health_bar.gd" id="2_healthbar"]
-[ext_resource type="Texture2D" uid="uid://cyt3l6vovoubw" path="res://assets/sprites/enemy_texture.png" id="3_texture"]
+[ext_resource type="Texture2D" uid="uid://oq4osdsqdfdh" path="res://assets/sprites/enemy_tank.png" id="2_tnyut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
-size = Vector2(120, 150)
+size = Vector2(95, 102)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(52.5, 82.5)
+size = Vector2(87, 80)
 
 [node name="EnemyTank" type="CharacterBody2D" groups=["enemies"]]
 collision_layer = 2
@@ -21,18 +21,18 @@ collision_layer = 0
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(-3.5, -1.5)
+position = Vector2(0.5, 2)
 shape = SubResource("RectangleShape2D_hitbox")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.25, 0.45, 0.25, 1)
-scale = Vector2(1.5, 1.5)
-texture = ExtResource("3_texture")
+scale = Vector2(2.03704, 2.03704)
+texture = ExtResource("2_tnyut")
 
 [node name="HealthBar" type="Node2D" parent="."]
 position = Vector2(-3.5, -45)
 script = ExtResource("2_healthbar")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-3.5, -1.5)
+position = Vector2(0.5, 5)
 shape = SubResource("RectangleShape2D_body")
